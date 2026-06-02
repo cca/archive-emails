@@ -77,6 +77,13 @@ For each processed email, a JSON file is created with the `.entities.json` exten
 }
 ```
 
+### Clean Subcommand
+
+```sh
+# Clean up entity JSON files
+uv run extract-entities clean data/ --entities
+```
+
 ### Compile Output
 
 Outputs a CSV of deduplicated entities (case-insensitive) with pipe-separated source email filenames for each entity.

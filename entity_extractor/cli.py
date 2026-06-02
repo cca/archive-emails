@@ -414,5 +414,48 @@ def write_entities_csv(
             )
 
 
+@cli.command(name="clean")
+@click.help_option("-h", "--help")
+@click.argument(
+    "directory",
+    type=click.Path(
+        exists=True, file_okay=False, dir_okay=True, writable=True, path_type=Path
+    ),
+)
+@click.option(
+    "--all",
+    "all_files",
+    help="Delete all files without asking for confirmation",
+    is_flag=True,
+)
+@click.option(
+    "--entities",
+    help="Delete only .entities.json files without asking for confirmation",
+    is_flag=True,
+)
+def clean(directory: Path, all_files: bool, entities: bool):
+    """Clean up generated files in the specified directory. By default, prompts for confirmation before deleting any files."""
+    if all_files or click.confirm(
+        f"Would you like to delete ALL generated files in {directory}?",
+        default=False,
+    ):
+        for file in directory.glob("*.*"):
+            if file.is_file():
+                file.unlink()
+        console.print("[green]All files deleted.[/green]")
+    elif entities or click.confirm(
+        f"Would you like to delete *.entities.json files in {directory}?",
+        default=False,
+    ):
+        for file in directory.glob("*.entities.json"):
+            if file.is_file():
+                file.unlink()
+        console.print("[bold green]Entity JSON files deleted.[/bold green]")
+    else:
+        console.print(
+            "[yellow]No action taken. Use --all or --entities to specify what to clean.[/yellow]"
+        )
+
+
 if __name__ == "__main__":
     cli()
