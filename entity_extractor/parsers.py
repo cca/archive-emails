@@ -46,18 +46,12 @@ def parse_eml(file_path: Path) -> Tuple[str, Optional[str]]:
 
             content_type: str = part.get_content_type()
             if content_type == "text/plain":
-                try:
-                    text_parts.append(part.get_content())
-                except Exception:
-                    continue
+                text_parts.append(part.get_content())
             # Some multipart emails have duplicate text/plain and text/html parts
             # but since we dedupe entities we can take all of them
             elif content_type == "text/html":
-                try:
-                    html_content = part.get_content()
-                    text_parts.append(strip_html_tags(html_content))
-                except Exception:
-                    continue
+                html_content = part.get_content()
+                text_parts.append(strip_html_tags(html_content))
     else:
         # Non-multipart message
         try:

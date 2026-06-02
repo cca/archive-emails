@@ -46,6 +46,7 @@ def cli():
 @click.option(
     "--format",
     "-f",
+    "file_format",
     default="eml",
     type=click.Choice(["eml", "html", "pdf"], case_sensitive=False),
     help="File format to process (default: eml)",
@@ -70,7 +71,7 @@ def cli():
 def extract(
     input_path: Path,
     output_dir: Optional[Path],
-    format: str,
+    file_format: str,
     wikidata: bool,
     model: str,
     entity_types: str,
@@ -90,7 +91,7 @@ def extract(
     )
 
     # Parse options
-    file_extension = f".{format.lower()}"
+    file_extension = f".{file_format.lower()}"
     entity_type_list = [et.strip() for et in entity_types.split(",")]
 
     # Collect files to process
