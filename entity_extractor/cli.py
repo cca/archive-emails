@@ -18,6 +18,7 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 from rich.table import Table
+from spacy.language import Language
 
 from .models import EmailEntities, Entity
 from .ner import NERProcessor
@@ -91,11 +92,11 @@ def extract(
     )
 
     # Parse options
-    file_extension = f".{file_format.lower()}"
-    entity_type_list = [et.strip() for et in entity_types.split(",")]
+    file_extension: str = f".{file_format.lower()}"
+    entity_type_list: List[str] = [et.strip() for et in entity_types.split(",")]
 
     # Collect files to process
-    files = collect_files(input_path, file_extension)
+    files: List[Path] = collect_files(input_path, file_extension)
 
     if not files:
         console.print("[yellow]No matching files found.[/yellow]")
@@ -107,12 +108,12 @@ def extract(
     try:
         ner_processor = NERProcessor(model_name=model)
         # Test loading the model
-        _ = ner_processor.nlp
+        _: Language = ner_processor.nlp
     except RuntimeError as e:
         console.print(f"[red]Error: {e}[/red]")
         sys.exit(1)
 
-    wikidata_linker = WikidataLinker() if wikidata else None
+    wikidata_linker: WikidataLinker | None = WikidataLinker() if wikidata else None
 
     if wikidata:
         console.print("[yellow]Wikidata linking enabled (this will be slower)[/yellow]")
@@ -161,7 +162,7 @@ def collect_files(input_path: Path, file_extension: str) -> List[Path]:
             return [input_path]
 
     # Directory - collect all files with the specified extension
-    files = list(input_path.glob(f"*{file_extension}"))
+    files: List[Path] = list(input_path.glob(f"*{file_extension}"))
 
     return sorted(files)
 
@@ -178,7 +179,7 @@ def process_file(
     text, subject, file_format = parse_email_file(file_path)
 
     # Extract entities
-    email_entities = ner_processor.extract_entities(
+    email_entities: EmailEntities = ner_processor.extract_entities(
         text=text,
         source_file=str(file_path.name),
         file_format=file_format,
@@ -195,7 +196,7 @@ def process_file(
     # Save to JSON
     output_dir.mkdir(parents=True, exist_ok=True)
     # ! Multiple runs, even using different formats, will overwrite existing entities files
-    output_file = output_dir / f"{file_path.stem}.entities.json"
+    output_file: Path = output_dir / f"{file_path.stem}.entities.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(email_entities.to_dict(), f, indent=2, ensure_ascii=False)
 
@@ -215,14 +216,14 @@ def display_summary(results: List[EmailEntities]):
     table.add_column("People", justify="right", style="yellow")
     table.add_column("Organizations", justify="right", style="yellow")
 
-    total_entities = 0
-    total_people = 0
-    total_orgs = 0
+    total_entities: int = 0
+    total_people: int = 0
+    total_orgs: int = 0
 
     for result in results:
-        entity_count = len(result.entities)
-        people_count = sum(1 for e in result.entities if e.label == "PERSON")
-        org_count = sum(1 for e in result.entities if e.label == "ORG")
+        entity_count: int = len(result.entities)
+        people_count: int = sum(1 for e in result.entities if e.label == "PERSON")
+        org_count: int = sum(1 for e in result.entities if e.label == "ORG")
 
         total_entities += entity_count
         total_people += people_count

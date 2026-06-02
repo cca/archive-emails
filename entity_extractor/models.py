@@ -29,7 +29,7 @@ class Entity:
         - "the " prefix (case-insensitive)
         - "'s" possessive suffix
         """
-        normalized = text.lower()
+        normalized: str = text.lower()
         # Remove "the " prefix
         if normalized.startswith("the "):
             normalized = normalized[4:]
