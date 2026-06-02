@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-extract-entities = "entity_extractor.cli:main"
+extract-entities = "entity_extractor.cli:cli"
 
 [build-system]
 requires = ["hatchling"]

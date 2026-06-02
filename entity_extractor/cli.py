@@ -135,7 +135,7 @@ def extract(
             progress.update(task, description=f"[cyan]Processing {file_path.name}...")
 
             try:
-                result = process_file(
+                result: EmailEntities = process_file(
                     file_path,
                     output_dir or file_path.parent,
                     ner_processor,
@@ -192,15 +192,20 @@ def process_file(
         email_entities.entities = wikidata_linker.enrich_entities(
             email_entities.entities
         )
+    write_entities_json(email_entities, output_dir, file_path)
+    return email_entities
 
+
+def write_entities_json(
+    entities: EmailEntities, output_dir: Path, file_path: Path
+) -> None:
+    """Write extracted entities to a JSON file."""
     # Save to JSON
     output_dir.mkdir(parents=True, exist_ok=True)
     # ! Multiple runs, even using different formats, will overwrite existing entities files
     output_file: Path = output_dir / f"{file_path.stem}.entities.json"
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(email_entities.to_dict(), f, indent=2, ensure_ascii=False)
-
-    return email_entities
+        json.dump(entities.to_dict(), f, indent=2, ensure_ascii=False)
 
 
 def display_summary(results: List[EmailEntities]):
@@ -321,16 +326,14 @@ def compile_entities(input_path: Path, output: Optional[Path], print_output: boo
                                 "wikidata_description"
                             ),
                         )
-                        if entity not in entity_sources:
-                            entity_sources[entity] = set()
-                        entity_sources[entity].add(source_file)
+                        entity_sources.setdefault(entity, set()).add(source_file)
             except Exception as e:
                 console.print(f"[red]Error reading {json_file.name}: {e}[/red]")
 
             progress.advance(task)
 
     # Sort entities by label then text
-    sorted_entities = sorted(
+    sorted_entities: List[Entity] = sorted(
         entity_sources.keys(), key=lambda e: (e.label, e.text.lower())
     )
 
@@ -378,10 +381,10 @@ def display_entities_table(entities: List[Entity]):
 
 def write_entities_csv(
     entities: List[Entity], entity_sources: dict[Entity, set[str]], output_path: Path
-):
+) -> None:
     """Write entities to a CSV file with source email information."""
     with open(output_path, "w", encoding="utf-8", newline="") as csvfile:
-        fieldnames = [
+        fieldnames: List[str] = [
             "text",
             "label",
             "wikidata_id",
@@ -394,11 +397,11 @@ def write_entities_csv(
 
         for entity in entities:
             # Sort source emails alphabetically, strip extension, and join with pipe
-            source_emails = " | ".join(
+            source_emails: str = " | ".join(
                 sorted(Path(src).stem for src in entity_sources[entity])
             )
             # Clean entity text by replacing newlines with spaces
-            clean_text = entity.text.replace("\n", " ").replace("\r", " ")
+            clean_text: str = entity.text.replace("\n", " ").replace("\r", " ")
             writer.writerow(
                 {
                     "text": clean_text,
@@ -409,12 +412,6 @@ def write_entities_csv(
                     "source_emails": source_emails,
                 }
             )
-
-
-# Keep backward compatibility by making the main function available
-def main():
-    """Main entry point for backward compatibility."""
-    cli()
 
 
 if __name__ == "__main__":
