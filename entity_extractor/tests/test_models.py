@@ -43,6 +43,32 @@ class TestEntityNormalization:
         assert hash(entity1) == hash(entity3)
         assert hash(entity1) == hash(entity4)
 
+    def test_normalization_trimming(self):
+        """Test that strings are normalized by trimming whitespace."""
+        entity1 = Entity(text="  Board  ", label="ORG")
+        entity2 = Entity(text="Board", label="ORG")
+        assert entity1 == entity2
+        assert hash(entity1) == hash(entity2)
+        # now with a prefix
+        entity3 = Entity(text="  the Board  ", label="ORG")
+        assert entity3 == entity2
+        assert hash(entity3) == hash(entity2)
+        # now with a suffix
+        entity4 = Entity(text="  Board's  ", label="ORG")
+        assert entity4 == entity2
+        assert hash(entity4) == hash(entity2)
+        # now with both
+        entity5 = Entity(text="  the Board's  ", label="ORG")
+        assert entity5 == entity2
+        assert hash(entity5) == hash(entity2)
+
+    def test_normalization_newlines(self):
+        """Test that newlines in the middle of text are normalized to spaces."""
+        entity1 = Entity(text="San\nDiego", label="GPE")
+        entity2 = Entity(text="San Diego", label="GPE")
+        assert entity1 == entity2
+        assert hash(entity1) == hash(entity2)
+
     def test_different_labels_not_equal(self):
         """Test that entities with same text but different labels are not equal."""
         entity1 = Entity(text="Washington", label="PERSON")

@@ -26,10 +26,14 @@ class Entity:
         """Normalize entity text for deduplication.
 
         Removes common variations:
+        - Leading/trailing whitespace
+        - newlines in the middle of text (replaced with space)
         - "the " prefix (case-insensitive)
         - "'s" possessive suffix
         """
-        normalized: str = text.lower()
+        normalized: str = text.lower().strip()
+        # Replace newlines with space
+        normalized = normalized.replace("\n", " ")
         # Remove "the " prefix
         if normalized.startswith("the "):
             normalized = normalized[4:]
