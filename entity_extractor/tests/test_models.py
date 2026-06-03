@@ -69,6 +69,22 @@ class TestEntityNormalization:
         assert entity1 == entity2
         assert hash(entity1) == hash(entity2)
 
+    def test_consecutive_whitespace_normalization(self):
+        """Test that consecutive whitespace is normalized to single space."""
+        entity1 = Entity(text="San   Diego", label="GPE")
+        entity2 = Entity(text="San Diego", label="GPE")
+        assert entity1 == entity2
+        assert hash(entity1) == hash(entity2)
+        entity3 = Entity(text="San\t\nDiego", label="GPE")
+        assert entity3 == entity2
+        assert hash(entity3) == hash(entity2)
+        entity4 = Entity(text="San \t  \n Diego", label="GPE")
+        assert entity4 == entity2
+        assert hash(entity4) == hash(entity2)
+        entity5 = Entity(text="San \nDiego", label="GPE")
+        assert entity5 == entity2
+        assert hash(entity5) == hash(entity2)
+
     def test_different_labels_not_equal(self):
         """Test that entities with same text but different labels are not equal."""
         entity1 = Entity(text="Washington", label="PERSON")

@@ -28,12 +28,15 @@ class Entity:
         Removes common variations:
         - Leading/trailing whitespace
         - newlines in the middle of text (replaced with space)
+        - consecutive whitespace characters collapsed to one space
         - "the " prefix (case-insensitive)
         - "'s" possessive suffix
         """
         normalized: str = text.lower().strip()
         # Replace newlines with space
         normalized = normalized.replace("\n", " ")
+        # Collapse consecutive whitespace to single space
+        normalized = " ".join(normalized.split())
         # Remove "the " prefix
         if normalized.startswith("the "):
             normalized = normalized[4:]
