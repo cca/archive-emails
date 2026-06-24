@@ -442,23 +442,34 @@ def write_entities_csv(
     is_flag=True,
 )
 def clean(directory: Path, all_files: bool, entities: bool):
-    """Clean up generated files in the specified directory. By default, prompts for confirmation before deleting any files."""
-    if all_files or click.confirm(
-        f"Would you like to delete ALL generated files in {directory}?",
-        default=False,
-    ):
-        for file in directory.glob("*.*"):
+    """Clean up generated files in the specified directory. By default with no flags, prompts for confirmation before deleting files."""
+
+    def delete_all_files(dir_path: Path):
+        for file in dir_path.glob("*.*"):
             if file.is_file():
                 file.unlink()
         console.print("[green]All files deleted.[/green]")
-    elif entities or click.confirm(
-        f"Would you like to delete *.entities.json files in {directory}?",
-        default=False,
-    ):
-        for file in directory.glob("*.entities.json"):
+
+    def delete_entity_files(dir_path: Path):
+        for file in dir_path.glob("*.entities.json"):
             if file.is_file():
                 file.unlink()
         console.print("[bold green]Entity JSON files deleted.[/bold green]")
+
+    if all_files:
+        delete_all_files(directory)
+    elif entities:
+        delete_entity_files(directory)
+    elif click.confirm(
+        f"Would you like to delete ALL generated files in {directory}?",
+        default=False,
+    ):
+        delete_all_files(directory)
+    elif click.confirm(
+        f"Would you like to delete *.entities.json files in {directory}?",
+        default=False,
+    ):
+        delete_entity_files(directory)
     else:
         console.print(
             "[yellow]No action taken. Use --all or --entities to specify what to clean.[/yellow]"
