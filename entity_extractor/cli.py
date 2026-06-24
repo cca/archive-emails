@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import List, Optional
 
 import click
-from rich.console import Console
+from rich.console import Console, Group
+from rich.live import Live
 from rich.panel import Panel
 from rich.progress import (
     BarColumn,
@@ -18,6 +19,7 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 from rich.table import Table
+from rich.text import Text
 from spacy.language import Language
 
 from .models import EmailEntities, Entity
@@ -121,18 +123,24 @@ def extract(
     # Process files with progress bar
     results = []
 
-    with Progress(
+    progress = Progress(
         SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
         BarColumn(),
         TaskProgressColumn(),
         TimeRemainingColumn(),
         console=console,
-    ) as progress:
-        task = progress.add_task("[cyan]Processing emails...", total=len(files))
+    )
+    task = progress.add_task("Processing emails...", total=len(files))
 
+    current_file_text: Text = Text("Preparing...", style="cyan")
+    with Live(
+        Group(current_file_text, progress),
+        console=console,
+        refresh_per_second=10,
+    ) as live:
         for file_path in files:
-            progress.update(task, description=f"[cyan]Processing {file_path.name}...")
+            current_file_text = Text(f"Processing {file_path.name}...", style="cyan")
+            live.update(Group(current_file_text, progress))
 
             try:
                 result: EmailEntities = process_file(
