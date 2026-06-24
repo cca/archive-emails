@@ -600,7 +600,7 @@ def temp_clean_dir(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "all_files,entities,input,expected_remaining",
+    "all_files,entities,user_input,expected_remaining",
     [
         (True, False, None, []),  # Delete all files
         (
@@ -642,7 +642,7 @@ def test_clean_command(
     temp_clean_dir: Path,
     all_files: bool,
     entities: bool,
-    input: str,
+    user_input: str,
     expected_remaining: list[str],
 ):
     """Test the clean command with different flags."""
@@ -656,7 +656,7 @@ def test_clean_command(
         args.append("--entities")
 
     # Invoke the CLI command
-    result = runner.invoke(cli, args, input=input)  # Simulate user input
+    result = runner.invoke(cli, args, input=user_input)  # Simulate user input
 
     assert result.exit_code == 0
 
