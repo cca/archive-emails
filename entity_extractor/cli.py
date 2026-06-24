@@ -442,7 +442,7 @@ def write_entities_csv(
     is_flag=True,
 )
 def clean(directory: Path, all_files: bool, entities: bool):
-    """Clean up generated files in the specified directory. By default with no flags, prompts for confirmation before deleting files."""
+    """Clean up files in the specified directory. By default with no flags, prompts for confirmation before deleting files."""
 
     def delete_all_files(dir_path: Path):
         for file in dir_path.glob("*.*"):
@@ -461,7 +461,7 @@ def clean(directory: Path, all_files: bool, entities: bool):
     elif entities:
         delete_entity_files(directory)
     elif click.confirm(
-        f"Would you like to delete ALL generated files in {directory}?",
+        f"Would you like to delete ALL files in {directory}?",
         default=False,
     ):
         delete_all_files(directory)
