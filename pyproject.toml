@@ -1,6 +1,6 @@
 [project]
 name = "entity-extractor"
-version = "0.1.0"
+version = "0.2.0"
 description = "Extract named entities from emails using spaCy NER"
 readme = "readme.md"
 requires-python = ">=3.10"
