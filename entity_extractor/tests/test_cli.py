@@ -2,6 +2,7 @@
 
 import csv
 import json
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
@@ -582,3 +583,83 @@ def test_compile_newlines_in_wikidata_description(tmp_path):
 
     # Wikidata description can keep newlines (CSV handles it)
     # This is okay because CSV properly quotes fields with newlines
+
+
+@pytest.fixture
+def temp_clean_dir(tmp_path):
+    """Create a temporary directory with test files for cleaning."""
+    # Create some test files
+    (tmp_path / "file1.entities.json").write_text("{}")
+    (tmp_path / "file2.entities.json").write_text("{}")
+    (tmp_path / "file.txt").write_text("Some text")
+    (tmp_path / "file.eml").write_text("Some text")
+    (tmp_path / "file.html").write_text("Some text")
+    (tmp_path / "file.csv").write_text("col1,col2\nval1,val2")
+
+    return tmp_path
+
+
+@pytest.mark.parametrize(
+    "all_files,entities,input,expected_remaining",
+    [
+        (True, False, None, []),  # Delete all files
+        (
+            False,
+            True,
+            None,
+            ["file.txt", "file.eml", "file.html", "file.csv"],
+        ),  # Delete only .entities.json
+        (
+            False,
+            False,
+            # User declines both deletions
+            # Note we need two input lines or CLI doesn't exit successfully
+            "n\nn\n",
+            [
+                "file1.entities.json",
+                "file2.entities.json",
+                "file.txt",
+                "file.eml",
+                "file.html",
+                "file.csv",
+            ],
+        ),
+        (
+            False,
+            False,
+            "y\n",  # User confirms all deletion
+            [],
+        ),
+        (
+            False,
+            True,
+            "n\ny\n",  # User declines all, confirms entities deletion
+            ["file.txt", "file.eml", "file.html", "file.csv"],
+        ),  # Delete only .entities.json
+    ],
+)
+def test_clean_command(
+    temp_clean_dir: Path,
+    all_files: bool,
+    entities: bool,
+    input: str,
+    expected_remaining: list[str],
+):
+    """Test the clean command with different flags."""
+    runner = CliRunner()
+
+    # Prepare command arguments
+    args: list[str] = ["clean", str(temp_clean_dir)]
+    if all_files:
+        args.append("--all")
+    if entities:
+        args.append("--entities")
+
+    # Invoke the CLI command
+    result = runner.invoke(cli, args, input=input)  # Simulate user input
+
+    assert result.exit_code == 0
+
+    # Check remaining files in the directory
+    remaining_files: list[str] = [f.name for f in temp_clean_dir.iterdir()]
+    assert sorted(remaining_files) == sorted(expected_remaining)
