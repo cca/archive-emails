@@ -445,7 +445,7 @@ def clean(directory: Path, all_files: bool, entities: bool):
     """Clean up files in the specified directory. By default with no flags, prompts for confirmation before deleting files."""
 
     def delete_all_files(dir_path: Path):
-        for file in dir_path.glob("*.*"):
+        for file in dir_path.iterdir():
             if file.is_file():
                 file.unlink()
         console.print("[green]All files deleted.[/green]")
@@ -455,6 +455,9 @@ def clean(directory: Path, all_files: bool, entities: bool):
             if file.is_file():
                 file.unlink()
         console.print("[bold green]Entity JSON files deleted.[/bold green]")
+
+    if all_files and entities:
+        raise click.UsageError("Options --all and --entities are mutually exclusive.")
 
     if all_files:
         delete_all_files(directory)

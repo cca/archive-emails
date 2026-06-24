@@ -642,7 +642,7 @@ def test_clean_command(
     temp_clean_dir: Path,
     all_files: bool,
     entities: bool,
-    user_input: str,
+    user_input: str | None,
     expected_remaining: list[str],
 ):
     """Test the clean command with different flags."""
@@ -663,3 +663,10 @@ def test_clean_command(
     # Check remaining files in the directory
     remaining_files: list[str] = [f.name for f in temp_clean_dir.iterdir()]
     assert sorted(remaining_files) == sorted(expected_remaining)
+
+
+def test_clean_command_error(temp_clean_dir):
+    """Test that clean command raises an error when both --all and --entities are used."""
+    runner = CliRunner()
+    result = runner.invoke(cli, ["clean", "--all", "--entities", str(temp_clean_dir)])
+    assert result.exit_code != 0
