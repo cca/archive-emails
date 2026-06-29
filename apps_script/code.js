@@ -86,7 +86,7 @@ function archiveEmails(startDate, endDate, sender, subjectKeyword, folderId) {
   log(`Found ${Math.floor(threads.length)} threads`)
 
   let folder = DriveApp.getFolderById(folderId)
-  let saved = 0
+  let savedMessages = []
 
   threads.forEach(function(thread) {
     let messages = thread.getMessages()
@@ -185,7 +185,7 @@ function archiveEmails(startDate, endDate, sender, subjectKeyword, folderId) {
         // Convert HTML blob to PDF and save
         const pdfBlob = htmlBlob.getAs('application/pdf').setName(filenameBase + '.pdf')
         const pdfFile = folder.createFile(pdfBlob)
-        saved++
+        savedMessages.push(filenameBase)
         log(`Saved files for: ${filenameBase}`, true)
       } catch (e) {
         log(`Failed converting/saving files for ${filenameBase}: ${e && e.message}`)
@@ -193,7 +193,8 @@ function archiveEmails(startDate, endDate, sender, subjectKeyword, folderId) {
     })
   })
 
-  log(`Saved ${saved} emails`)
+  writeSummaryFile(folderId, query, savedMessages)
+  log(`Saved ${savedMessages.length} emails`)
 }
 
 /**
@@ -337,4 +338,22 @@ function escapeHtml(s) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+}
+
+/**
+ * Write summary text file to Drive with list of saved emails and attachments.
+ * @param {string} folderId - Drive folder ID to save summary file into
+ * @param {string} query - Gmail search query used to find emails
+ * @param {string[]} savedMessages - array of saved email dates and subjects
+ * @returns {File} the created summary file
+ */
+function writeSummaryFile(folderId, query, savedMessages) {
+  if (!folderId || !savedMessages || !savedMessages.length) return
+  let content = '# Summary of Archived Emails\n'
+  content += 'Query: ' + query + '\n'
+  content += 'Total saved emails: ' + savedMessages.length + '\n\n'
+  content += 'Saved emails:\n'
+  content += savedMessages.join('\n') + '\n'
+  const folder = DriveApp.getFolderById(folderId)
+  return folder.createFile('summary.txt', content)
 }
