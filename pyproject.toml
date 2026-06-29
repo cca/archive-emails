@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 dependencies = [
     "spacy==3.8.14",
     "rich==15.0.0",
-    "click==8.4.1",
+    "click==8.4.2",
     "beautifulsoup4==4.15.0",
     "pdfplumber==0.11.10",
     "requests==2.34.2",
@@ -23,7 +23,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "pytest==9.1.1",
-    "ruff==0.15.19",
+    "ruff==0.15.20",
 ]
 
 [tool.ruff.lint]
