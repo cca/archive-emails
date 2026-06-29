@@ -175,20 +175,20 @@ function archiveEmails(startDate, endDate, sender, subjectKeyword, folderId) {
 
       // Save 3 files: HTML, EML, and a PDF created from HTML
       try {
-        // Save EML file
+        // EML
         const rawContent = msg.getRawContent()
         const emlBlob = Utilities.newBlob(rawContent, 'message/rfc822', filenameBase + '.eml')
         folder.createFile(emlBlob)
-        // Save HTML file
+        // HTML
         const htmlBlob = Utilities.newBlob(html, 'text/html', filenameBase + '.html')
         folder.createFile(htmlBlob)
         // Convert HTML blob to PDF and save
         const pdfBlob = htmlBlob.getAs('application/pdf').setName(filenameBase + '.pdf')
         const pdfFile = folder.createFile(pdfBlob)
         saved++
-        log(`Saved PDF: ${pdfFile.getName()}`, true)
+        log(`Saved files for: ${filenameBase}`, true)
       } catch (e) {
-        log(`Failed converting/saving PDF for ${filenameBase}: ${e && e.message}`)
+        log(`Failed converting/saving files for ${filenameBase}: ${e && e.message}`)
       }
     })
   })
