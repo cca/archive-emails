@@ -66,7 +66,11 @@ function archiveEmails(startDate, endDate, sender, subjectKeyword, folderId) {
   if (!endDate || !endDate.match(/^\d{4}\-\d{2}\-\d{2}$/)) {
     throw new Error('endDate is required (format YYYY-MM-DD). Use archiveYear(year) to archive a full year.')
   }
-  // ! We do not validate endDate > startDate, Gmail will just return 0 results
+  const startDateObj = new Date(startDate)
+  const endDateObj = new Date(endDate)
+  if (startDateObj >= endDateObj) {
+    throw new Error('startDate must be before endDate')
+  }
 
   // create folder if we do not have one
   folderId = folderId || getOrCreateFolderByName(`${sender} Email Archive`).getId()
